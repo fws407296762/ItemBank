@@ -1,4 +1,29 @@
 <!--index.wxml-->
 <view class="container">
-  
+  <scroll-view class="scroll__nav" scroll-x>
+    <view class="nav__box">
+      <text bindtap='selectSujectType' data-index="{{index}}" data-typeid="{{sujectType.Typeid}}" wx:key="unique" class="nav__item {{sujectType.active && 'nav__item-active'}}" wx:for="{{sujectTypeList}}" wx:for-item="sujectType">{{sujectType.TypeName}}</text>
+    </view>
+  </scroll-view>
+  <view class="body">
+    <scroll-view scroll-top="{{sujectListScrollTop}}" scroll-y class="suject__list">
+        <view class="suject__item" wx:key="unique" wx:for="{{sujectList}}" wx:for-item="suject">
+          <view class="suject__title">{{suject.Subjectname}}</view>
+          <view class="suject__options">
+            <radio-group data-index="{{index}}" data-answer="{{suject.Subjectanswer}}" bindchange="selectOptionChange">
+              <view class="suject__options-item" wx:key="unique" wx:for="{{suject.Subjectoption}}"  wx:for-item="options">
+              <label>
+                <radio class="suject__options-radio" value="{{options.optionname}}"></radio>
+                {{options.optionname}}：{{options.optioncontent}}
+               </label>
+            </view>
+            </radio-group>
+            <view class='suject__answer' wx:if="{{!!suject.selectAnswer}}">
+              <label class="suject__answer--select">您的选择：<text style="{{suject.selectAnswer === suject.Subjectanswer ? 'color:#1AAD16' : 'color:#f00'}}">{{suject.selectAnswer}}</text></label>
+              <label class="suject__answer--right">正确答案：{{suject.Subjectanswer}}</label>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+  </view>
 </view>

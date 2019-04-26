@@ -1,3 +1,7 @@
 {
+  "navigationBarTitleText": "英语题库",
+  "navigationBarBackgroundColor": "#009999",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh":false,
   "usingComponents": {}
 }

@@ -4,51 +4,87 @@ const app = getApp()
 
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
-  },
-  //事件处理函数
-  bindViewTap: function() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
+    sujectTypeList:[],
+    sujectList:[],
+    sujectListScrollTop:0
   },
   onLoad: function () {
-    if (app.globalData.userInfo) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse){
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
+    this.requestSujectType();
+    this.requestSujectList(1);
+  },
+  //请求类别
+  requestSujectType(){
+    wx.request({
+      url:"http://localhost:9002/sujecttypes",
+      method:"GET",
+      success:(xhr)=>{
+        let res = xhr.data;
+        let sujectTypeList = res.data.map(item=>{
+          item.active = false;
+          return item;
+        });
+        sujectTypeList[0].active = true;
         this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
+          sujectTypeList
         })
       }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
-    }
+    })
   },
-  getUserInfo: function(e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
+  //请求题目
+  requestSujectList(typeid){
+    wx.request({
+      url:"http://localhost:9002/getsujectbytypeid",
+      data:{
+        typeid: typeid
+      },
+      success:(xhr)=>{
+        let res = xhr.data;
+        let sujectList = res.data;
+        sujectList = sujectList.map(item=>{
+          let subjectoption = JSON.parse(item.Subjectoption);
+          let subjectoptionAry = [];
+          for (let i in subjectoption){
+            subjectoptionAry.push({
+              optionname:i,
+              optioncontent: subjectoption[i]
+            })
+          }
+          item.Subjectoption = subjectoptionAry;
+          item.selectAnswer = "";
+          return item;
+        });
+        this.setData({
+          sujectList
+        })
+      }
+    })
+  },
+  //选择栏目
+  selectSujectType(e){
+    let dataset = e.currentTarget.dataset;
+    let typeid = dataset.typeid;
+    let index = parseInt(dataset.index);
+    this.requestSujectList(typeid);
+    let sujectTypeList = this.data.sujectTypeList;
+    sujectTypeList.forEach(item=>{
+      item.active = false;
+    })
+    sujectTypeList[index].active = true;
     this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
+      sujectListScrollTop:0,
+      sujectTypeList
+    })
+  },
+  //选择选项
+  selectOptionChange(e){
+    let dataset = e.currentTarget.dataset;
+    let index = dataset.index;
+    let answer = dataset.answer;
+    let selectValue = e.detail.value;
+    let sujectList = this.data.sujectList;
+    sujectList[index].selectAnswer = selectValue;
+    this.setData({
+      sujectList
     })
   }
 })
