@@ -5,16 +5,14 @@ const puppeteer = require("puppeteer");
 const DB = require("./db/config");
 let SqliteDB = new DB.SqliteDB("./db/database.db");
 ;(async ()=>{
-  let url = "https://www.koolearn.com/shiti/list-1-3-104935-1.html"; //合成
+  let url = "https://www.koolearn.com/shiti/list-1-3-27622-6.html";
   let sujects = await getSubjects(url);
   let sujectsAnwers = await getSubjectAnswer(sujects);
-  // console.log(sujectsAnwers)
   let newSujectsAnwers = sujectsAnwers.map(item=>{
     let options = item.options;
-    return [item.title,JSON.stringify(options),1,item.answer,true,"新东方"]
+    return [item.title,JSON.stringify(options),12,item.answer,true,"新东方"]
   });
-  console.log(newSujectsAnwers);
-
+  // console.log(newSujectsAnwers);
   SqliteDB.insertData("insert into tb_Subject(Subjectname,Subjectoption,Subjecttype,Subjectanswer,Subjectstatus,Subjectfrom) values(?,?,?,?,?,?)",newSujectsAnwers)
 })()
 
@@ -24,7 +22,10 @@ async function getSubjects(url){
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
-  let $pResults = await page.$$eval(".i-timu>.content",async (nodes,abc)=>{
+  let $ajax_total = await page.$eval("#ajax_total",(node)=>{
+    return node.innerText;
+  });
+  let $pResults = await page.$$eval(".i-timu>.content",async (nodes)=>{
     let newresults = [];
     for(let i = 0;i<nodes.length;i++){
       let node = nodes[i];
@@ -73,8 +74,6 @@ async function getSubjectAnswer(subjectList){
       recursionGetAnswer(index);
     })(index);
   })
-
-  console.log(newSubjectList)
 }
 
 // app.listen(8080)
