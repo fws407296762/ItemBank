@@ -85,26 +85,51 @@ async function getClassification(){
   const page = await brower.newPage();
   //获取初中英语知识点
   let pageRes = await page.goto(koolearn.route.juniorhigh);
+  console.log("开始获取分类...")
   let trees = await page.$eval(".i-left .i-card .i-tree div.content",el=>{
-    let trees = [];
+    let itrees = [];
     let $jiParts = el.querySelectorAll(".ji-part");
     for(let i = 0;i<$jiParts.length;i++){
       let $title = $jiParts[i].querySelector(".title");
       let $a = $title.querySelector("a");
       let $jiChapter = $jiParts[i].querySelector(".ji-chapter");
-      (function getchapters(chapter){
-
-      })($jiChapter)
-      let $jiChapterPiece = $jiChapter.querySelectorAll(".ji-chapter-piece");
-      trees.push({
+      let treeNode = {
         title:$a.textContent,
-        route:$a.href
-      })
+        route:$a.href,
+        children:null
+      }
+      let treeChildrenNode = (function getchapters(chapter){
+        let chapterNodes = [];
+        let $jiChapterPiece = chapter.querySelectorAll(":scope>.ji-chapter-piece");
+        for(let j = 0;j<$jiChapterPiece.length;j++){
+          let $jiChapterPieceItem = $jiChapterPiece[j];
+          let $a = $jiChapterPieceItem.querySelector("a");
+          let $jiChapter = $jiChapterPieceItem.querySelector(".ji-chapter");
+          let chapterNodeItem = {
+            title:$a.textContent,
+            route:$a.href
+          }
+          if($jiChapter){
+            chapterNodeItem.children = getchapters($jiChapter);
+          }
+          chapterNodes.push(chapterNodeItem)
+        }
+        return chapterNodes;
+      })($jiChapter);
+      if(treeChildrenNode.length){
+        treeNode.children = treeChildrenNode
+      }
+      itrees.push(treeNode)
     }
-    return trees;
+    return itrees;
   });
+  if(trees.length){
+    console.log("分类获取成功")
+  }
+  console.log("分类获取结束");
+  console.log("打印trees:",JSON.stringify(trees,null,2))
+  return trees;
 
-  console.log("trees:",trees)
 }
 getClassification();
 // app.listen(8080)
