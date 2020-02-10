@@ -12,7 +12,6 @@ let SqliteDB = new DB.SqliteDB("./db/database.db");
 //获取题目分类接口
 app.get("/sujecttypes",(req,res)=>{
   SqliteDB.queryData("select * from tb_Subjecttype",(row)=>{
-    console.log(row);
     res.send({
       code:0,
       message:"",

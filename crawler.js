@@ -5,15 +5,18 @@ const puppeteer = require("puppeteer");
 const DB = require("./db/config");
 let SqliteDB = new DB.SqliteDB("./db/database.db");
 ;(async ()=>{
-  let url = "https://www.koolearn.com/shiti/list-1-3-27622-6.html";
+  let url = "https://www.koolearn.com/shiti/list-1-3-27622-8.html";
+  console.log("开始获取题目")
   let sujects = await getSubjects(url);
+  console.log("开始获取答案")
   let sujectsAnwers = await getSubjectAnswer(sujects);
   let newSujectsAnwers = sujectsAnwers.map(item=>{
     let options = item.options;
     return [item.title,JSON.stringify(options),12,item.answer,true,"新东方"]
   });
-  // console.log(newSujectsAnwers);
+  console.log("插入数据库")
   SqliteDB.insertData("insert into tb_Subject(Subjectname,Subjectoption,Subjecttype,Subjectanswer,Subjectstatus,Subjectfrom) values(?,?,?,?,?,?)",newSujectsAnwers)
+  console.log("完成")
 })()
 
 
