@@ -6,12 +6,13 @@
 
 const express = require("express");
 const app = express();
-const DB = require("./db/config");
-let SqliteDB = new DB.SqliteDB("./db/database.db");
+const sqlite3 = require("sqlite3");
+const sqlite = require("sqlite");
 
 //获取题目分类接口
 app.get("/sujecttypes",(req,res)=>{
   SqliteDB.queryData("select * from tb_Subjecttype",(row)=>{
+    console.log("row:",row)
     res.send({
       code:0,
       message:"",

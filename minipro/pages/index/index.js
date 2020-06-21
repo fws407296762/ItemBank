@@ -19,10 +19,12 @@ Page({
       method:"GET",
       success:(xhr)=>{
         let res = xhr.data;
+        console.log("res:",res)
         let sujectTypeList = res.data.map(item=>{
           item.active = false;
           return item;
         });
+        console.log("sujectTypeList:",sujectTypeList)
         sujectTypeList[0].active = true;
         this.setData({
           sujectTypeList

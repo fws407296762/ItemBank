@@ -2,21 +2,134 @@ const express = require("express");
 const crawler = express();
 const https = require("https");
 const puppeteer = require("puppeteer");
+const path = require("path");
 const koolearn = require("./config/koolearn");
-const DB = require("./db/config");
+const sqlite3 = require("sqlite3");
+const Sequelize = require("sequelize");
+const Model = Sequelize.Model;
 
-let SqliteDB = new DB.SqliteDB("./db/database.db");
-// ;(async ()=>{
-//   let url = "https://www.koolearn.com/shiti/list-1-3-27622-6.html";
-//   let sujects = await getSubjects(url);
-//   let sujectsAnwers = await getSubjectAnswer(sujects);
-//   let newSujectsAnwers = sujectsAnwers.map(item=>{
-//     let options = item.options;
-//     return [item.title,JSON.stringify(options),12,item.answer,true,"新东方"]
-//   });
-//   // console.log(newSujectsAnwers);
-//   SqliteDB.insertData("insert into tb_Subject(Subjectname,Subjectoption,Subjecttype,Subjectanswer,Subjectstatus,Subjectfrom) values(?,?,?,?,?,?)",newSujectsAnwers)
-// })()
+const sequelize = new Sequelize({
+  dialect:"sqlite",
+  storage:path.join(__dirname,"./db/database.db")
+})
+
+sequelize.authenticate().then(() => {
+  console.log('数据库连接成功');
+}).catch(err => {
+  console.error('无法连接到数据库:', err);
+});
+
+//知识点模型
+class KnowLedgePoint extends Model{}
+KnowLedgePoint.init({
+    point_id:{
+      type: Sequelize.INTEGER,
+      primaryKey:true,
+      autoIncrement:true
+    },
+    point_name:{
+      type:Sequelize.TEXT,
+      allowNull:false
+    },
+    point_href:{
+      type:Sequelize.TEXT,
+      allowNull:false
+    },
+    parent_id:{
+      type:Sequelize.INTEGER,
+      allowNull:true
+    }
+  },
+  {
+    sequelize,
+    modelName:"knowledgepoint",
+    freezeTableName:true,
+    timestamps: false
+  });
+
+//题型模型
+class TopicType extends Model{}
+TopicType.init({
+  type_name:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  type_value:{
+    type:Sequelize.TEXT,
+    allowNull:false,
+    primaryKey:true
+  }
+},
+  {
+    sequelize,
+    modelName:"topic_type",
+    freezeTableName:true,
+    timestamps: false
+  })
+
+//难度模型
+class TopicDiff extends Model{}
+TopicDiff.init({
+  diff_name:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  diff_value:{
+    type:Sequelize.TEXT,
+    allowNull:false,
+    primaryKey:true
+  }
+},
+  {
+    sequelize,
+    modelName:"topic_diff",
+    freezeTableName:true,
+    timestamps: false
+  })
+
+//题目
+class Topic extends Model{}
+Topic.init({
+  topic_id:{
+    type: Sequelize.INTEGER,
+    primaryKey:true,
+    autoIncrement:true
+  },
+  topic_title:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  topic_options:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  topic_type:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  topic_diff:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  topic_answer:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  },
+  point_id:{
+    type:Sequelize.INTEGER,
+    allowNull:false
+  },
+  topic_analyze:{
+    type:Sequelize.TEXT,
+    allowNull:false
+  }
+},
+  {
+    sequelize,
+    modelName:"topic",
+    freezeTableName:true,
+    timestamps: false
+  })
 
 
 //获取页面中题目
@@ -79,17 +192,20 @@ async function getSubjectAnswer(subjectList){
 }
 
 //获取页面中知识点
-async function getClassification(){
+async function getKnowledgePoint(){
   console.log("开始执行...")
   const brower = await puppeteer.launch();
   const page = await brower.newPage();
   //获取初中英语知识点
   let pageRes = await page.goto(koolearn.route.juniorhigh);
   console.log("开始获取分类...")
-  let trees = await page.$eval(".i-left .i-card .i-tree div.content",el=>{
+  let trees = await page.$eval(".i-left .i-card .i-tree div.content",async (el)=>{
     let itrees = [];
     let $jiParts = el.querySelectorAll(".ji-part");
-    for(let i = 0;i<$jiParts.length;i++){
+    let index = 0;
+    async function eachParts(i){
+      console.log("i:",i)
+      if(i === $jiParts.length){return false;}
       let $title = $jiParts[i].querySelector(".title");
       let $a = $title.querySelector("a");
       let $jiChapter = $jiParts[i].querySelector(".ji-chapter");
@@ -120,16 +236,225 @@ async function getClassification(){
         treeNode.children = treeChildrenNode
       }
       itrees.push(treeNode)
+      i++;
+      await eachParts(i);
     }
+    await eachParts(index);
     return itrees;
   });
   if(trees.length){
     console.log("分类获取成功")
   }
   console.log("分类获取结束");
-  console.log("打印trees:",JSON.stringify(trees,null,2))
+  // console.log("打印trees:",JSON.stringify(trees,null,2))
   return trees;
 
 }
-getClassification();
+
+//获取最后一级知识点的URL
+async function getLastPoint(){
+  let knowledgePoint = await getKnowledgePoint();
+  let index = 0;
+  let lastPoints = [];
+  function getLast(i,tree) {
+    if(i === tree.length)return false;
+    let point = tree[i];
+    let children = point.children;
+    if(children && children.length){
+      getLast(index,children);
+    }else{
+      lastPoints.push(point)
+    }
+    i++;
+    getLast(i,tree);
+  }
+  getLast(index,knowledgePoint)
+  return lastPoints;
+}
+
+//将数据库里面数据改为 tree
+async function knowledgePointToTree(){
+  let KnowLedgePointCount = await KnowLedgePoint.findAndCountAll();
+  let pointRows = KnowLedgePointCount.rows;
+  let pointTree = [];
+  let index = 0;
+  for(let i = 0;i<pointRows.length;i++){
+    let point = pointRows[i];
+    let parentId = point.parent_id;
+    if(!parentId){
+      pointTree.push({
+        id:point.point_id,
+        name:point.point_name,
+        href:point.point_href,
+        parentid:point.parent_id
+      })
+    }else{
+
+    }
+  }
+  console.log(pointTree);
+}
+
+
+
+//插入知识点到数据库
+async function insertKnowLedgePoint(){
+  let index = 0;
+  let knowledgePointTree = await getKnowledgePoint();
+  async function insert(i,tree,parent_id){
+    if(i === tree.length){return false;}
+    let point = tree[i];
+    let title = point.title,
+      href = point.route,
+      children = point.children;
+    let createStse = {
+      point_name:title,
+      point_href:href
+    }
+    parent_id && (createStse.parent_id = parent_id);
+    let klpoint = await KnowLedgePoint.create(createStse)
+    let parentId = klpoint.point_id;
+    if(children && children.length){
+      await insert(index,children,parentId)
+    }
+    i++;
+    await insert(i,tree,parent_id)
+  }
+  await insert(index,knowledgePointTree);
+}
+
+//获取题型类型
+async function getTopicType(){
+  const brower = await puppeteer.launch();
+  const page = await brower.newPage();
+  //获取初中英语知识点
+  let pageRes = await page.goto(koolearn.route.juniorhigh);
+  console.log("开始获取题型类型...")
+  let types = await page.$eval(".p-selector1 ul",async (el)=>{
+    let types = [];
+    let $li = el.querySelectorAll("li");
+    for(let i = 0;i<$li.length;i++){
+      let li = $li[i];
+      let type_value = li.getAttribute("type_id");
+      let type_name = li.innerText;
+      types.push({
+        type_value:type_value,
+        type_name:type_name
+      })
+    }
+    return types;
+  });
+  if(types.length){
+    console.log("题型获取成功")
+  }
+  console.log("题型获取结束");
+  return types;
+}
+
+//插入题型类型到数据库
+async function insertTopType(){
+  let topictype = await getTopicType();
+  let index = 0
+  async function insert(i){
+    if(i === topictype.length)return false;
+    let types = topictype[i];
+    let type_name = types.type_name,
+        type_value = types.type_value;
+
+    try{
+      let topic_types = await TopicType.create({
+        type_name,
+        type_value
+      })
+    }catch(e){
+      console.log(new Error(e));
+    }
+
+    i++;
+    await insert(i);
+  }
+  await insert(index)
+}
+
+//获取难度类型
+async function getTopicDiff() {
+  const brower = await puppeteer.launch();
+  const page = await brower.newPage();
+  //获取初中英语知识点
+  let pageRes = await page.goto(koolearn.route.juniorhigh);
+  console.log("开始获取难度数据...")
+  let diffs = await page.$eval(".p-selector2 ul",async (el)=>{
+    let diffs = [];
+    let $li = el.querySelectorAll("li");
+    for(let i = 0;i<$li.length;i++){
+      let li = $li[i];
+      let diff_value = li.getAttribute("diff_id");
+      let diff_name = li.innerText;
+      diffs.push({
+        diff_value:diff_value,
+        diff_name:diff_name
+      })
+    }
+    return diffs;
+  });
+  if(diffs.length){
+    console.log("难度获取成功")
+  }
+  console.log("难度获取结束");
+  return diffs;
+}
+
+//插入难度类型到数据库
+async function insertTopicDiff(){
+  let topicdiff = await getTopicDiff();
+  let index = 0
+  async function insert(i){
+    if(i === topicdiff.length)return false;
+    let diff = topicdiff[i];
+    let diff_name = diff.diff_name,
+      diff_value = diff.diff_value;
+
+    try{
+      let topic_diff = await TopicDiff.create({
+        diff_name,
+        diff_value
+      })
+    }catch(e){
+      console.log(new Error(e));
+    }
+
+    i++;
+    await insert(i);
+  }
+  await insert(index)
+}
+
+(async ()=>{
+  //判断是否有知识点，如果没有就插入数据
+  let KnowLedgePointCount = await KnowLedgePoint.findAndCountAll();
+  if(!KnowLedgePointCount.count){
+    insertKnowLedgePoint();
+  }
+
+  //判断是否有题型数据，如果没有就插入数据
+  let TopicTypeCount = await TopicType.findAndCountAll();
+  if(!TopicTypeCount.count){
+    await insertTopType();
+  }
+  
+  //判断是否有难度数据，如果没有就插入数据
+  let TopicDiffCount = await TopicDiff.findAndCountAll();
+  if(!TopicDiffCount.count){
+    await insertTopicDiff();
+  }
+
+  await knowledgePointToTree();
+})()
+
+
+
 // app.listen(8080)
+
+
+
+
