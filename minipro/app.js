@@ -1,4 +1,5 @@
 //app.js
+const api = require("./assets/util/api");
 App({
   onLaunch: function () {
     // 展示本地存储能力
@@ -33,7 +34,5 @@ App({
       }
     })
   },
-  globalData: {
-    userInfo: null
-  }
+  api
 })

@@ -1,0 +1,3 @@
+page{
+  --fontSize:32rpx;
+}

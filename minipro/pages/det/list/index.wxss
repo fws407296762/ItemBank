@@ -1,0 +1,10 @@
+/* pages/det/index.wxss */
+@import "../../../assets/css/common.wxss";
+.det__item{
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.det__item-nav{
+  padding: 30rpx 20rpx;
+  font-size: var(--fontSize);
+  color:#333;
+}

@@ -1,0 +1,11 @@
+/* pages/det/detail/index.wxss */
+
+.detdetail__item{
+  padding:20rpx 10rpx;
+  box-sizing: border-box;
+}
+.det__content{
+  white-space: pre-wrap;
+  font-size: 32rpx;
+  line-height: 46rpx;
+}

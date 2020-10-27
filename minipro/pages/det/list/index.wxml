@@ -1,0 +1,7 @@
+<view class="det__container">
+  <view class='det__list'>
+    <view wx:for="{{detList}}" class="det__item">
+      <navigator data-testaperid="{{item.testaperid}}" data-testpapername="{{item.testpapername}}" bindtap="navigateToDetail" class="det__item-nav">{{item.testpapername}}</navigator>
+    </view>
+  </view>
+</view>  
