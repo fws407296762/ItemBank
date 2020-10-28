@@ -1,10 +1,19 @@
 <!--pages/det/detail/index.wxml-->
 <view class="detdetail__container">
   <swiper class="detdetail__scroll">
-    <swiper-item wx:for="{{detsDetail}}" class="detdetail__item">
-      <view class="det__content">{{item.topicContent}}</view>
+    <swiper-item wx:for="{{detsDetail}}" wx:for-index="detindex" class="detdetail__item">
+      <view class="det__content">
+        <text class="det__contentindex">{{detindex + 1}}.</text>
+        <view class="det__contenttext">{{item.topicContent}}</view>
+      </view>
       <view class="det__optionsbox">
-        <view class="det_options-item" wx:for-item="option" wx:for="{{item.topicOptions}}">{{option.content}}</view>
+        <radio-group>
+          <view class="det_options-item" wx:for-item="option" wx:for="{{item.topicOptions}}">
+            <radio>
+              <text class="det_options-itemtext">{{option.content}}</text>
+            </radio>
+          </view>
+        </radio-group>
       </view>
     </swiper-item>
   </swiper>

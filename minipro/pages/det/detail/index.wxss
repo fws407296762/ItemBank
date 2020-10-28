@@ -1,11 +1,35 @@
 /* pages/det/detail/index.wxss */
-
+page{
+  height: 100%;
+}
+.detdetail__container{
+  height: 100%;
+}
+.detdetail__scroll{
+  height: 100%;
+}
 .detdetail__item{
-  padding:20rpx 10rpx;
+  padding:30rpx 20rpx;
   box-sizing: border-box;
 }
 .det__content{
-  white-space: pre-wrap;
+  white-space: pre-line;
   font-size: 32rpx;
   line-height: 46rpx;
+  padding-left: 40rpx;
+}
+.det__contentindex{
+  float: left;
+  margin-left: -40rpx;
+  font-size: 36rpx;
+}
+.det__optionsbox{
+  margin-top: 40rpx;
+  font-size: 32rpx;
+}
+.det_options-item{
+  margin-top: 20rpx;
+}
+.det_options-itemtext{
+  margin-left: 10rpx;
 }
