@@ -45,3 +45,17 @@ page{
   font-weight: 400;
   -webkit-font-smoothing: subpixel-antialiased;
 }
+.reading__cloze__content{
+  background: #f0f0f0;
+  padding: 40rpx 20rpx;
+  font-weight: 300;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.reading__cloze__content .content-text-break{
+  margin-bottom: 20rpx;
+  line-height: 52rpx;
+}
+.reading__cloze__content .content-text-break:last-of-type{
+  margin-bottom: 0;
+}

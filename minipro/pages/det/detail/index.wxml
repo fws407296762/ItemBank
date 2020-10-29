@@ -1,25 +1,13 @@
 <!--pages/det/detail/index.wxml-->
-<wxs src="../../../assets/wxs/util.wxs" module="util" />
+
+<import src="./detail.wxml" />
 <view class="detdetail__container">
   <swiper class="detdetail__scroll">
-    <swiper-item wx:for="{{detsDetail}}" wx:for-index="detindex" class="detdetail__item">
-      <view class="det__content">
-        <text class="det__contentindex">{{detindex + 1}}.</text>
-        <view class="det__contenttext">
-          <rich-text wx:if="{{item.topicType === 'dialogue' || item.topicType === 'analysis'}}" nodes="{{util.breakToTag(item.topicContent)}}"></rich-text>
-          <rich-text wx:if="{{item.topicType === 'reading'}}" nodes="{{util.breakToTag(item.readingContent)}}"></rich-text>
-          <rich-text wx:if="{{item.topicType === 'cloze'}}" nodes="{{util.breakToTag(item.clozeContent)}}"></rich-text>
-        </view>
-      </view>
-      <view class="det__optionsbox">
-        <radio-group>
-          <view class="det_options-item" wx:for-item="option" wx:for="{{item.topicOptions}}">
-            <radio>
-              <text class="det_options-itemtext">{{option.content}}</text>
-            </radio>
-          </view>
-        </radio-group>
-      </view>
+    <swiper-item wx:for="{{detsDetail}}" wx:for-item="detitem" wx:for-index="detindex" class="detdetail__item">
+      <scroll-view style="height:100%;" scroll-y="true" wx:if="{{detitem.topicType === 'reading' ||  detitem.topicType === 'cloze'}}">
+        <template is="detailContent" data="{{detindex:detindex,detitem:detitem}}"></template>
+      </scroll-view>
+      <template wx:else is="detailContent" data="{{detindex:detindex,detitem:detitem}}"></template>
     </swiper-item>
   </swiper>
 </view>

@@ -1,0 +1,19 @@
+<wxs src="../../../assets/wxs/util.wxs" module="util" />
+<template name="topicContent">
+  <view class="det__content" wx:if="{{topic.topicContent}}">
+    <text class="det__contentindex">{{topicindex + 1}}.</text>
+    <view class="det__contenttext">
+      <rich-text nodes="{{util.breakToTag(topic.topicContent)}}"></rich-text>
+    </view>
+  </view>
+  <view class="det__optionsbox">
+    <text class="det__contentindex" wx:if="{{!topic.topicContent}}">{{topicindex + 1}}.</text>
+    <radio-group>
+      <view class="det_options-item" wx:for-item="option" wx:for="{{topic.topicOptions}}">
+        <radio>
+          <text class="det_options-itemtext">{{option.content}}</text>
+        </radio>
+      </view>
+    </radio-group>
+  </view>
+</template>
