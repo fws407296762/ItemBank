@@ -1,10 +1,15 @@
 <!--pages/det/detail/index.wxml-->
+<wxs src="../../../assets/wxs/util.wxs" module="util" />
 <view class="detdetail__container">
   <swiper class="detdetail__scroll">
     <swiper-item wx:for="{{detsDetail}}" wx:for-index="detindex" class="detdetail__item">
       <view class="det__content">
         <text class="det__contentindex">{{detindex + 1}}.</text>
-        <view class="det__contenttext">{{item.topicContent}}</view>
+        <view class="det__contenttext">
+          <rich-text wx:if="{{item.topicType === 'dialogue' || item.topicType === 'analysis'}}" nodes="{{util.breakToTag(item.topicContent)}}"></rich-text>
+          <rich-text wx:if="{{item.topicType === 'reading'}}" nodes="{{util.breakToTag(item.readingContent)}}"></rich-text>
+          <rich-text wx:if="{{item.topicType === 'cloze'}}" nodes="{{util.breakToTag(item.clozeContent)}}"></rich-text>
+        </view>
       </view>
       <view class="det__optionsbox">
         <radio-group>

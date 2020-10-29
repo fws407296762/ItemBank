@@ -6,7 +6,11 @@ Page({
    * 页面的初始数据
    */
   data: {
-    detsDetail:[]
+    detsDetail:[],
+    dialogueList:[],
+    readingList:[],
+    analysisList:[],
+    clozeList:[]
   },
   //请求详情
   async requestDetDetailByTestPaperId(options){

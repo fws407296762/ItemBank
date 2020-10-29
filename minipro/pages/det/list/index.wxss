@@ -7,4 +7,6 @@
   padding: 30rpx 20rpx;
   font-size: var(--fontSize);
   color:#333;
+  font-weight: 300;
+  -webkit-font-smoothing: subpixel-antialiased;
 }

@@ -1,0 +1,21 @@
+var breakToTag = function(str){
+  var breakReg = getRegExp("\n","g");
+  var colonReg = getRegExp("^(\s*\w+\:)")
+  var html = "";
+  if(str){
+    var iscontainbreak = breakReg.test(str);
+    if(iscontainbreak){
+      var strary = str.split("\n");
+      for(var i = 0;i<strary.length;i++){
+        var stritem = strary[i];
+        var colonStart = colonReg.test(stritem);
+        stritem = stritem.replace(colonReg,"<span class='content-bold'>$1</span>");
+        html += "<div class='content-text-break'>" + stritem + "</div>";
+      }
+    }
+  }
+  return html || str;
+}
+module.exports = {
+  breakToTag:breakToTag
+};
