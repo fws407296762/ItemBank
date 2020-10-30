@@ -5,7 +5,9 @@
   <swiper class="detdetail__scroll">
     <swiper-item wx:for="{{detsDetail}}" wx:for-item="detitem" wx:for-index="detindex" class="detdetail__item">
       <scroll-view style="height:100%;" scroll-y="true" wx:if="{{detitem.topicType === 'reading' ||  detitem.topicType === 'cloze'}}">
-        <template is="detailContent" data="{{detindex:detindex,detitem:detitem}}"></template>
+        <view class="scroll__view--detail">
+          <template is="detailContent" data="{{detindex:detindex,detitem:detitem}}"></template>
+        </view>
       </scroll-view>
       <template wx:else is="detailContent" data="{{detindex:detindex,detitem:detitem}}"></template>
     </swiper-item>

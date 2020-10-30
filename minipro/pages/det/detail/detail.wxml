@@ -3,10 +3,12 @@
 <template name="detailContent">
   <view wx:if="{{detitem.topicType === 'reading' || detitem.topicType === 'cloze'}}" class="reading__cloze__content">
     <rich-text wx:if="{{detitem.topicType === 'reading'}}" nodes="{{util.breakToTag(detitem.readingContent)}}"></rich-text>
-    <rich-text wx:if="{{detitem.topicType === 'cloze'}}" nodes="{{util.breakToTag(detitem.clozeContent)}}"></rich-text>
+    <rich-text class="cloze__optionsbox" wx:if="{{detitem.topicType === 'cloze'}}" nodes="{{util.breakToTag(detitem.clozeContent)}}"></rich-text>
   </view>
   <block wx:if="{{detitem.topics}}" wx:for="{{detitem.topics}}" wx:for-item="topicitem">
-    <template is='topicContent' data="{{topicindex:index + detindex,topic:topicitem}}"></template>
+    <view class="det__topics__optionbox {{topicitem.topicType === 'cloze' ? 'det__clozetopics__optionbox' : ''}}">
+      <template is='topicContent' data="{{topicindex:index + detindex,topic:topicitem}}"></template>
+    </view>
   </block>
   <template wx:if="{{!detitem.topics}}" is='topicContent' data="{{topicindex:detindex,topic:detitem}}"></template>
 </template>

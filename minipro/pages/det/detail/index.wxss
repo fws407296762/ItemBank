@@ -8,6 +8,9 @@ page{
 .detdetail__scroll{
   height: 100%;
 }
+.scroll__view--detail{
+  padding-bottom: 40rpx;
+}
 .detdetail__item{
   box-sizing: border-box;
 }
@@ -58,4 +61,14 @@ page{
 }
 .reading__cloze__content .content-text-break:last-of-type{
   margin-bottom: 0;
+}
+.det__topics__optionbox{
+  margin-top: 30rpx;
+}
+.det__topics__optionbox .det__content{
+  padding: 20rpx 20rpx 20rpx 66rpx;
+  font-size: 32rpx;
+}
+.det__clozetopics__optionbox .det__optionsbox{
+  padding-left: 66rpx;
 }
