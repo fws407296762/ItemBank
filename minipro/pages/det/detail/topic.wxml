@@ -15,5 +15,5 @@
         </radio>
       </view>
     </radio-group>
-  </view>
+  </view> 
 </template>
